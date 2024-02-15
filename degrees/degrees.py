@@ -92,7 +92,7 @@ def shortest_path(source, target):
     If no possible path, returns None.
     """
 
-      # For keeping track of how many nodes have been explored
+    # For keeping track of how many nodes have been explored
     num_explored = 0
 
     start = Node(state=source, parent=None, action=None)
@@ -108,7 +108,7 @@ def shortest_path(source, target):
             return None
 
         node = frontier.remove()
-        #print(f"Exploring {node.state}")
+        #printf("Exploring {node.state}")
         num_explored += 1
 
         # Mark actor (node) as explored
@@ -116,7 +116,7 @@ def shortest_path(source, target):
         # Find the neighbors (actors to which he can connect) of the actor
         neighbors = neighbors_for_person(node.state)
         for movie, actor in neighbors:
-            if actor not in explored and  not frontier.contains_state(actor):
+            if actor not in explored and not frontier.contains_state(actor):
                 child = Node(state=actor, parent=node, action=movie)
                 if child.state == target:
                     # Return list of tuples (movie_id, actor_id)
@@ -129,8 +129,6 @@ def shortest_path(source, target):
                     path.reverse()
                     return path
                 frontier.add(child)
-    raise NotImplementedError
-
 
 def person_id_for_name(name):
     """
