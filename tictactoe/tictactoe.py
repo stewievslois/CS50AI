@@ -57,11 +57,11 @@ def result(board, action):
     Returns the board that results from making move (i, j) on the board.
     """
     #check for valid action
-    (x,y) = action
-    if 0 <= x <= 2:
-        raise Exception
-    if 0 <= y <= 2: 
-        raise Exception
+    #(x,y) = action
+    #if 0 <= x <= 2:
+        #raise Exception
+    #if 0 <= y <= 2: 
+        #raise Exception
     
     #copy original board
     result = copy.deepcopy(board)
@@ -75,7 +75,7 @@ def winner(board):
     """
     Returns the winner of the game, if there is one.
     """
-    #check rows
+    #check vertically
     for i in range(3):
         if board[i][0] == board[i][1] == board[i][2]:
             if board[i][0] == X:
@@ -84,6 +84,8 @@ def winner(board):
                 return O
             else:
                 return None
+    
+    #check horizontally
     for j in range(3):
         if board[0][j] == board[1][j] == board[2][j]:
             if board[0][j] == X:
