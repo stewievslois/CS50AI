@@ -65,10 +65,8 @@ def result(board, action):
         raise Exception("error")
     
     #check for taken move
-    #for i in range(3):
-       #for j in range(3):
-           #if board[i][j] != EMPTY:
-            #raise Exception("error")
+    if board[x][y] != EMPTY:
+        raise Exception("error")
     
     #copy original board
     result = copy.deepcopy(board)

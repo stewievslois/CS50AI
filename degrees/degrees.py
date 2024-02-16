@@ -94,6 +94,10 @@ def shortest_path(source, target):
 
     # For keeping track of how many nodes have been explored
     num_explored = 0
+    
+    if source == target:
+        path = []
+        return path
 
     start = Node(state=source, parent=None, action=None)
     frontier = QueueFrontier()
