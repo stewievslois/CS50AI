@@ -25,13 +25,14 @@ def player(board):
     xcount = 0
     ocount = 0
     
-    if xcount = 0
+    if xcount == 0:
         xcount =+1
         return X
-    else if xcount > ocount
+    elif xcount > ocount:
         ocount =+1
         return O
-        else xcount =+1
+    elif xcount == ocount: 
+        xcount =+1
         return X  
 
 
