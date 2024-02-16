@@ -12,22 +12,79 @@ CKnave = Symbol("C is a Knave")
 # Puzzle 0
 # A says "I am both a knight and a knave."
 knowledge0 = And(
-    # TODO
-    # test
+    # not a knight and a knave
+    Not(And(AKnight, AKnave)),
+    
+    # must be a knight or knave
+    Or(AKnight, AKnave),
+    
+    # If A is a knight
+    Implication(AKnight, And(AKnight, AKnave)),
+    # If A is a knave
+    Implication(AKnave, Not(And(AKnight, AKnave)))
 )
 
 # Puzzle 1
 # A says "We are both knaves."
 # B says nothing.
 knowledge1 = And(
-    # TODO
+    # Knowledge
+    # not a knight and a knave
+    Not(And(AKnight, AKnave)),
+    Not(And(BKnight, BKnave)),
+    
+    # must be a knight or knave
+    Or(AKnight, AKnave),
+    Or(BKnight, BKnave),
+    
+    # can't say we are both Knaves and be a knight
+    Not(AKnight),
+    
+    # If A is a knight
+    Implication(AKnight, BKnave),
+    # If A is a knave
+    Implication(AKnave, BKnight),
+        
 )
 
 # Puzzle 2
 # A says "We are the same kind."
 # B says "We are of different kinds."
 knowledge2 = And(
-    # TODO
+    # General Knowledge
+    # not a knight and a knave
+    Not(And(AKnight, AKnave)),
+    Not(And(BKnight, BKnave)),
+    
+    # must be a knight or knave
+    Or(AKnight, AKnave),
+    Or(BKnight, BKnave),
+    
+    # Situation Knowledge
+    # If A knight, B knave
+    Not(And(AKnave, BKnave)),
+    And(AKnight, BKnight),
+    
+    # If A knave, B knight
+    Not(And(AKnave, BKnave)),
+    And(AKnave, BKnight),
+    
+    # If B knight, A knave
+    Not(And(AKnight, BKnight)),
+    And(AKnave, BKnight),
+    
+    # If B knave, A knave
+    Not(And(AKnight, BKnave)),
+    And(AKnave, BKnave),
+ 
+    # If A is a knight
+    Implication(AKnight, BKnight),
+    # If A is a knave
+    Implication(AKnave, BKnight),
+    # If B is a knight
+    # Implication(AKnave, BKnight),
+    # If B is a knave
+    # Implication(AKnave, BKnave),
 )
 
 # Puzzle 3
