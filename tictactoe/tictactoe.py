@@ -3,6 +3,7 @@ Tic Tac Toe Player
 """
 
 import math
+import copy
 
 X = "X"
 O = "O"
@@ -22,39 +23,92 @@ def player(board):
     """
     Returns player who has the next turn on a board.
     """
-    xcount = 0
-    ocount = 0
+    turncount = 0
+
+    for i in range(3):
+        for j in range(3):
+            if board[i][j] != EMPTY:
+                turncount += 1
     
-    if xcount == 0:
-        xcount =+1
+    if board == initial_state():
         return X
-    elif xcount > ocount:
-        ocount =+1
+    if turncount % 2 == 1:
         return O
-    elif xcount == ocount: 
-        xcount =+1
-        return X  
+    else:
+        return X
 
 
 def actions(board):
     """
     Returns set of all possible actions (i, j) available on the board.
     """
-    raise NotImplementedError
+    #create possible move array
+    possiblemoves = set()
+    for i in range(3):
+       for j in range(3):
+           if board[i][j] == EMPTY:
+               possiblemoves.add((i,j))
+    
+    return possiblemoves
 
 
 def result(board, action):
     """
     Returns the board that results from making move (i, j) on the board.
     """
-    raise NotImplementedError
+    #check for valid action
+    (x,y) = action
+    if 0 <= x <= 2:
+        raise Exception
+    if 0 <= y <= 2: 
+        raise Exception
+    
+    #copy original board
+    result = copy.deepcopy(board)
+    
+    #apply action to board
+    result[action[0]][action[1]] = player(board)
+    return result
 
 
 def winner(board):
     """
     Returns the winner of the game, if there is one.
     """
-    raise NotImplementedError
+    #check rows
+    for i in range(3):
+        if board[i][0] == board[i][1] == board[i][2]:
+            if board[i][0] == X:
+                return X
+            elif board[i][0] == O:
+                return O
+            else:
+                return None
+    for j in range(3):
+        if board[0][j] == board[1][j] == board[2][j]:
+            if board[0][j] == X:
+                return X
+            elif board[0][j] == O:
+                return O
+            else:
+                return None
+    
+    #check diagnals
+    if board[0][0] == board[1][1] == board[2][2]:
+        if board[0][0] == X:
+            return X
+        elif board[0][0] == O:
+            return O
+        else:
+            return None
+    if board[2][0] == board[1][1] == board[0][2]:
+        if board[2][0] == X:
+            return X
+        elif board[2][0] == O:
+            return O
+        else:
+            return None
+    return None
 
 
 def terminal(board):
