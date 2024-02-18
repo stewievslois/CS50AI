@@ -238,6 +238,8 @@ class MinesweeperAI():
         
         # 4) Mark safes
         # Mark mines
+        
+        
         # 5) Add new sentence to knowledgebase
 
     def make_safe_move(self):
