@@ -105,11 +105,11 @@ class Sentence():
         """
         Returns the set of all cells in self.cells known to be mines.
         """
-        # if count of cells containing mines != 0 then mines
-        if self.count != 0:
-            return 
-        else:
+        # if no. of cells = count then all cells in sentence are mines
+        if len(self.cells) == self.count:
             return self.cells
+        else:
+            return set()
 
     def known_safes(self):
         """
@@ -126,14 +126,29 @@ class Sentence():
         Updates internal knowledge representation given the fact that
         a cell is known to be a mine.
         """
-        raise NotImplementedError
+        # check if cell is in sentence
+        if cell in self.cells:
+        # if cell is in sentence remove cell from sentence and reduce count by 1
+            self.cells.remove(cell)
+            self.count -= 1
+            return self.cells and self.count
+        # if cell is not in sentence, take no action
+        else:
+            return self.cells
 
     def mark_safe(self, cell):
         """
         Updates internal knowledge representation given the fact that
         a cell is known to be safe.
         """
-        raise NotImplementedError
+        # check if cell is in sentence
+        if cell in self.cells:
+        # if cell is in sentence remove cell from sentence
+            self.cells.remove(cell)
+            return self.cells
+        # if cell is not in sentence, take no action
+        else:
+            return self.cells
 
 
 class MinesweeperAI():
@@ -190,7 +205,40 @@ class MinesweeperAI():
             5) add any new sentences to the AI's knowledge base
                if they can be inferred from existing knowledge
         """
-        raise NotImplementedError
+        # 1) add cell to moves made
+        self.moves_made.add(cell)
+        
+        # 2) call mark_safe
+        self.mark_safe(cell)
+        
+        # 3) Loop over all cells and create new sentence removing current cell
+        new_sentence_cells = set()
+        for i in range(cell[0] - 1, cell[0] + 2):
+            for j in range(cell[1] - 1, cell[1] + 2):
+
+                # Ignore the cell itself
+                if (i, j) == cell:
+                    continue
+                
+                # Ignore if cell is already safe
+                if (i, j) in self.safes:
+                    continue
+                
+                # Ignore if cell is a mine and reduce count by 1
+                if (i, j) in self.mines:
+                    count =- 1
+                    continue
+                
+                # add to new_sentence_cells if they are in game board
+                if 0 <= i < self.height and 0 <= j < self.width:
+                    new_sentence_cells.add((i, j))
+
+        # commit new sentence to knowledge base
+        self.knowledge.append(Sentence(new_sentence_cells, count))
+        
+        # 4) Mark safes
+        # Mark mines
+        # 5) Add new sentence to knowledgebase
 
     def make_safe_move(self):
         """
@@ -201,6 +249,9 @@ class MinesweeperAI():
         This function may use the knowledge in self.mines, self.safes
         and self.moves_made, but should not modify any of those values.
         """
+        # Identify all safe moves
+        # Subtract all made moves from safe moves
+        # Choose one unmade safe move at random
         raise NotImplementedError
 
     def make_random_move(self):
@@ -210,4 +261,15 @@ class MinesweeperAI():
             1) have not already been chosen, and
             2) are not known to be mines
         """
-        raise NotImplementedError
+        # Identify all moves
+        check_random_move = True
+        while check_random_move == True:
+            for i in range(0, self.height):
+                for j in range(0, self.width):
+                    # check selection not in moves made or mines
+                    if (i, j) not in self.moves_made and (i, j) not in self.mines:
+                        return (i, j)
+                    # no moves left not made and not mines
+                    else:
+                        check_random_move = False
+                        return None
