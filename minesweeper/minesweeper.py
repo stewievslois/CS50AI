@@ -274,11 +274,11 @@ class MinesweeperAI():
         # 5) Add new sentence to knowledgebase
         for sentence in self.knowledge:
             if new_sentence.cells.issubset(sentence.cells) and count > 0 and new_sentence.count > 0 and new_sentence != sentence:
-                newsubset = Sentence.cells.difference(new_sentence.cells)
-                new_sentencesubset = Sentence(list(newsubset), Sentence.count - new_sentence.count)
+                newsubset = sentence.cells.difference(new_sentence.cells)
+                new_sentencesubset = Sentence(list(newsubset), sentence.count - new_sentence.count)
                 self.knowledge.append(new_sentencesubset) 
                 
-       # https://www.youtube.com/watch?v=dbSCJGJVIBU
+       # https://www.youtube.com/watch?v=dbSCJGJVIBU (18:33)
                 
 
     def make_safe_move(self):
