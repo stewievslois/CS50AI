@@ -183,7 +183,18 @@ def update(probabilities, one_gene, two_genes, have_trait, p):
     Which value for each distribution is updated depends on whether
     the person is in `have_gene` and `have_trait`, respectively.
     """
-    raise NotImplementedError
+    # calculate how many copies of gene
+    for person in probabilities:
+        if person in two_genes:
+            person_gene = 2
+        elif person in one_gene:
+            person_gene = 1
+        else:
+            person_gene = 0
+
+        # Update gene and trait
+        probabilities[person]['gene'][person_gene] += p
+        probabilities[person]['trait'][person in have_trait] += p
 
 
 def normalize(probabilities):
@@ -191,8 +202,34 @@ def normalize(probabilities):
     Update `probabilities` such that each probability distribution
     is normalized (i.e., sums to 1, with relative proportions the same).
     """
-    raise NotImplementedError
+    # Loop each person's probability distribution
+    for person in probabilities.values():
+        # Loop each random variables (i.e. "gene" and "trait")
+        for variable in person.values():
+            # Get the sum of probability distribution of the random variable
+            denominator = sum(variable.values())
+            # Loop each outcome and probability
+            for outcome, probability in variable.items():
+                # Normalize the probability distribution by dividing the sum
+                variable[outcome] = probability / denominator
 
+def inherit_prob(parent_name, one_gene, two_genes):
+    """
+    joint_probability helper function
+
+    Returns the probability of a parent giving a copy of the mutated gene to their child.
+
+    Takes:
+    - parent_name - the name of the parent
+    - one_gene - set of people having 1 copy of the gene
+    - two_genes - set of people having two copies of the gene.
+    """
+    if parent_name in two_genes:
+        return 1 - PROBS['mutation']
+    elif parent_name in one_gene:
+        return 0.5
+    else:
+        return PROBS['mutation']
 
 if __name__ == "__main__":
     main()
