@@ -56,28 +56,35 @@ def transition_model(corpus, page, damping_factor):
     With probability `damping_factor`, choose a link at random
     linked to by `page`. With probability `1 - damping_factor`, choose
     a link at random chosen from all pages in the corpus.
+
+    If a page has no outgoing links, returns an equal probability for all pages in the corpus
     """
-    # Create dictionary to store output in
-    output = dict()
+    # Initialise probability distribution dictionary:
+    prob_dist = {page_name : 0 for page_name in corpus}
     
-    # Pages that are linked from current page
-    links = corpus.get(page)
-    # Probability for a certain page in corpus to be linked to from current page
-    if links:
-        p_link = damping_factor / len(links)
-    # Determine landing probability for every page
-    for pages in corpus:
-        # Probability to choose a random page out of all pages in the corpus
-        p = (1 - damping_factor) / len(corpus)
-        
-        # Add probability to land on a page via a link from the current page
-        if pages in links:
-            p = p + p_link
-        # Add page and landing probability to output dictionary
-        output.update({pages: p})
-    
-    # Return probability distribution over which page to visit next     
-    return output
+    # Find No. of Pages
+    num_pages = len(corpus)
+
+    # If page has no links, return equal probability for all pages in corpus:
+    if len(corpus[page]) == 0:
+        for page_name in prob_dist:
+            prob_dist[page_name] = 1 / num_pages
+        return prob_dist
+
+    # Probability of picking any page at random:
+    random_prob = (1 - damping_factor) / num_pages
+
+    # Probability of picking a link from the page:
+    link_prob = damping_factor / len(corpus[page])
+
+    # Add probabilities to the distribution:
+    for page_name in prob_dist:
+        prob_dist[page_name] += random_prob
+
+        if page_name in corpus[page]:
+            prob_dist[page_name] += link_prob
+
+    return prob_dist
 
 
 def sample_pagerank(corpus, damping_factor, n):
@@ -89,44 +96,34 @@ def sample_pagerank(corpus, damping_factor, n):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    # Create output dictionary with every page in corpus and initial PageRank value of 0
-    output = dict()
-    for pages in corpus:
-        output.update({pages: 0})
-    
-    # Choose a random starting page and update PageRank value
-    page = random.choice(list(corpus.keys()))  
-    output.update({page: 1/n})
-    
-    # Sample further only if n > 1
-    if n > 1:
-        # Sample PageRank n-1 times
-        for i in range(n-1):
-            # Get probability distribution for current page
-            p_dict = transition_model(corpus, page, damping_factor)
-            
-            # Create a list with every page and cumulative probability
-            p_list = []
-            sum_p = 0
-            for key in p_dict:
-                sum_p = sum_p + p_dict.get(key)
-                p_list.append([key, sum_p])
-            
-            # Take a random number between 0 and 1
-            rand = random.uniform(0,1)
-          
-            # Choose a random page based on the probability distribution
-            for i in range(len(p_list)):
-                if rand < p_list[i][1]:
-                    page = p_list[i][0]
-                    break
-            
-            # Update PageRank value for chosen page
-            PR = output.get(page) + 1/n
-            output.update({page: PR})
-    
-    # Return dictionary with pagenames and PageRank values   
-    return output
+    # Initialise visits dictionary:
+    visits = {page_name: 0 for page_name in corpus}
+
+    # First page choice is picked at random:
+    page = random.choice(list(visits))
+    visits[page] += 1
+
+    # For remaining samples (remainig samples = n -1), pick the page based on the transistion model:
+    for i in range(0, n-1):
+
+        trans_model = transition_model(corpus, page, damping_factor)
+
+        # Pick next page based on the transition model probabilities:
+        rand_val = random.random()
+        total_prob = 0
+
+        for page_name, probability in trans_model.items():
+            total_prob += probability
+            if rand_val <= total_prob:
+                page = page_name
+                break
+
+        visits[page] += 1
+
+    # Normalise visits using sample number:
+    page_ranks = {page_name: (visit_num/n) for page_name, visit_num in visits.items()}
+
+    return page_ranks
 
 
 def iterate_pagerank(corpus, damping_factor):
@@ -138,47 +135,51 @@ def iterate_pagerank(corpus, damping_factor):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    # Create output dictionary with every page in corpus and initial PageRank value of 1/(number of pages)
-    output = dict()
-    for pages in corpus:
-        p = 1 / len(corpus)
-        output.update({pages: p})
-        
-    # Repeat until PageRank values do not change more than 0.001
-    while True:
-        # Initiate a variable to measure PageRank value change
-        dif = 0
-        # Update PageRank value for every page p in corpus
-        for page in output:
-            # PageRank value of current page p
-            PR = output.get(page)
-            # Intialise new PageRank value for page p as with the probability to land on the page at random
-            PR_new = (1 - damping_factor) / len(corpus)
-            # Calculate PageRank contribution from other pages i
-            for otherpage in corpus:
-                # PageRank value of page i
-                PR_link = output.get(otherpage)
-                # Number of links on page i
-                NumLinks = len(corpus.get(otherpage))
-                # If page i has no links, it is treated as having a link to every page
-                if NumLinks == 0:
-                    PR_new = PR_new + damping_factor * PR_link / len(corpus)    
-                # Add Sum part of PageRank equation for every page i that links to page p
-                elif page in corpus.get(otherpage):
-                    # Add contribution of page i to the PageRank of page p, as per the PageRank formula
-                    PR_new = PR_new + damping_factor * PR_link / NumLinks
-            # Save new PageRank value in output dictionary
-            output.update({page: PR_new})
-            # Calculate the change in PageRank value and save this value if it's larger than for other pages
-            newdif = abs(PR_new - PR)
-            dif = max(dif, newdif)
-        # Break if PageRank values do not change more than 0.001
-        if dif < 0.001:
-            break
-    
-    # Return dictionary with pagenames and PageRank values   
-    return output
 
+    # Variables and definitions for later use:
+    num_pages = len(corpus)
+    init_rank = 1 / num_pages
+    random_choice_prob = (1 - damping_factor) / num_pages
+    iterations = 0
+
+    # Initial page_rank gives every page same rank of 1/(num pages in corpus)
+    page_ranks = {page_name: init_rank for page_name in corpus}
+    new_ranks = {page_name: None for page_name in corpus}
+    max_rank_change = init_rank
+
+    # Iteratively calculate page rank until no change > 0.001
+    while max_rank_change > 0.001:
+
+        iterations += 1
+        max_rank_change = 0
+
+        for page_name in corpus:
+            surf_choice_prob = 0
+            for other_page in corpus:
+                # If other page has no links it picks randomly any corpus page:
+                if len(corpus[other_page]) == 0:
+                    surf_choice_prob += page_ranks[other_page] * init_rank
+                # Else if other_page has a link to page_name, it randomly picks from all links on other_page:
+                elif page_name in corpus[other_page]:
+                    surf_choice_prob += page_ranks[other_page] / len(corpus[other_page])
+            # Calculate new page rank
+            new_rank = random_choice_prob + (damping_factor * surf_choice_prob)
+            new_ranks[page_name] = new_rank
+
+        # Normalise the new page ranks:
+        norm_factor = sum(new_ranks.values())
+        new_ranks = {page: (rank / norm_factor) for page, rank in new_ranks.items()}
+
+        # Find max change in page rank:
+        for page_name in corpus:
+            rank_change = abs(page_ranks[page_name] - new_ranks[page_name])
+            if rank_change > max_rank_change:
+                max_rank_change = rank_change
+
+        # Update page ranks to the new ranks:
+        page_ranks = new_ranks.copy()
+
+    return page_ranks
 
 
 if __name__ == "__main__":
