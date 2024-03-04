@@ -139,8 +139,17 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         * everyone in set `have_trait` has the trait, and
         * everyone not in set` have_trait` does not have the trait.
     """
-    raise NotImplementedError
-
+    joint = []
+    for person in people:
+        gene = get_gene(person, one_gene, two_genes)
+        trait = person in have_trait
+        # P(G, T) = P(G) * P(T | G)
+        joint.append(
+            predict_gene(person, people, one_gene, two_genes)
+            * PROBS["trait"][gene][trait]
+        )
+    # Calculate joint probability of the population by multiplying every individual's probability
+    return np.prod(joint)
 
 def update(probabilities, one_gene, two_genes, have_trait, p):
     """
